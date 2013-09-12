@@ -113,7 +113,7 @@ func (board *AbstractBoard) Play(x uint8, y uint8, color BoardStatus) (bool, err
 
     captures, err := board.legal(x, y, color)
     if err != nil {
-        return false, fmt.Errorf("Move is not legal!")
+        return false, err
     }
 
     log.Printf("Captures: %+v", captures)
@@ -150,7 +150,7 @@ func (board *AbstractBoard) legal(x uint8, y uint8, color BoardStatus) (captures
         return
     }
 
-    // TODO: Check for suicide
+    // Check if the played move has no liberties and therefore is a suicide
     selfNoLiberties := board.getNoLibertyStones(x, y, 0)
     if len(selfNoLiberties) > 0 {
         // Take move back
