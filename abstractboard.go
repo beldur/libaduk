@@ -93,40 +93,40 @@ func (board *AbstractBoard) UndostackAppendPass() {
 }
 
 // Play move on board
-func (board *AbstractBoard) PlayMove(move Move) (bool, error) {
+func (board *AbstractBoard) PlayMove(move Move) (error) {
     return board.Play(move.X, move.Y, move.Color)
 }
 
 // Play stone at given position
-func (board *AbstractBoard) Play(x uint8, y uint8, color BoardStatus) (bool, error) {
+func (board *AbstractBoard) Play(x uint8, y uint8, color BoardStatus) (error) {
     log.Printf("Play: X: %v, Y: %v, Color: %v", x, y, color)
 
     // Is move on the board?
     if x < 0 || x >= board.BoardSize || y < 0 || y >= board.BoardSize {
-        return false, fmt.Errorf("Invalid move position!")
+        return fmt.Errorf("Invalid move position!")
     }
 
     // Is already a stone on this position?
     if board.getStatus(x, y) != EMPTY {
-        return false, fmt.Errorf("Position already occupied!")
+        return fmt.Errorf("Position already occupied!")
     }
 
     captures, err := board.legal(x, y, color)
     if err != nil {
-        return false, err
+        return err
     }
 
     log.Printf("Captures: %+v", captures)
 
     // TODO: Remove captures and add them to undostack
 
-    return true, nil
+    return nil
 }
 
 // Checks if move is legal and returns captured stones if necessary
 func (board *AbstractBoard) legal(x uint8, y uint8, color BoardStatus) (captures []Position, err error) {
     captures = make([]Position, 0)
-    neighbours := board.neighbours(x, y)
+    neighbours := board.getNeighbours(x, y)
 
     // Check if we capture neighbouring stones
     for i := 0; i < len(neighbours); i++ {
@@ -170,17 +170,17 @@ func (board *AbstractBoard) getNoLibertyStones(x uint8, y uint8, exc int) (noLib
 }
 
 // Returns the neighbour array positions for a given point
-func (board *AbstractBoard) neighbours(x uint8, y uint8) (neighbourIndexes []Position) {
+func (board *AbstractBoard) getNeighbours(x uint8, y uint8) (neighbourIndexes []Position) {
     neighbourIndexes = make([]Position, 0)
 
     // Check for board borders
-    if x >= 1 {
+    if x > 0 {
         neighbourIndexes = append(neighbourIndexes, Position { (x - 1), y })
     }
     if x < board.BoardSize - 1 {
         neighbourIndexes = append(neighbourIndexes, Position { (x + 1), y })
     }
-    if y >= 1 {
+    if y > 0 {
         neighbourIndexes = append(neighbourIndexes, Position { x, y - 1 })
     }
     if y < board.BoardSize - 1 {
