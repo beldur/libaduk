@@ -84,12 +84,14 @@ func (board *AbstractBoard) UndostackPop() (move *Move) {
 
 // Adds the given Move to the Undostack
 func (board *AbstractBoard) UndostackPush(move *Move) {
+    log.Printf("Add Move to Undostack: %+v", move)
+
     board.undoStack = append(board.undoStack, move)
 }
 
 // Adds a Pass to the Undostack
-func (board *AbstractBoard) UndostackAppendPass() {
-    board.undoStack = append(board.undoStack, &Move { 255, 255, PASS, nil })
+func (board *AbstractBoard) UndostackPushPass() {
+    board.UndostackPush(&Move { 255, 255, PASS, nil })
 }
 
 // Play move on board
@@ -111,14 +113,19 @@ func (board *AbstractBoard) Play(x uint8, y uint8, color BoardStatus) (error) {
         return fmt.Errorf("Position already occupied!")
     }
 
+    // Check if move is legal and get captures
     captures, err := board.legal(x, y, color)
     if err != nil {
         return err
     }
 
-    log.Printf("Captures: %+v", captures)
+    // Remove captures
+    for i := 0; i < len(captures); i++ {
+        board.setStatus(captures[i].X, captures[i].Y, EMPTY)
+    }
 
-    // TODO: Remove captures and add them to undostack
+    // Add them to undostack
+    board.UndostackPush(&Move { x, y, color, captures })
 
     return nil
 }
