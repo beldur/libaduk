@@ -14,6 +14,11 @@ type Position struct {
     Y uint8
 }
 
+// Checks if the position has the same coordinates as b
+func (a *Position) isSamePosition(b Position) bool {
+    return a.X == b.X && a.Y == b.Y
+}
+
 // Represents a Move on the board
 type Move struct {
     X uint8
