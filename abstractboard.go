@@ -135,15 +135,19 @@ func (board *AbstractBoard) legal(x uint8, y uint8, color BoardStatus) (captures
     captures = make([]Position, 0)
     neighbours := board.getNeighbours(x, y)
 
+    log.SetPrefix("legal ")
+    log.Printf("Neighbours for Playmove (X: %d, Y: %d) are %+v", x, y, neighbours)
+
     // Check if we capture neighbouring stones
     for i := 0; i < len(neighbours); i++ {
         // Is neighbour from another color?
         if board.getStatus(neighbours[i].X, neighbours[i].Y) == board.invertColor(color) {
-            log.Printf("Neighbour of (X: %d, Y: %d) at (X: %d, Y: %d) is %v",
+            log.SetPrefix("legal ")
+            log.Printf("Neighbour of Playmove (X: %d, Y: %d) at (X: %d, Y: %d) is %v. Get its No liberties...",
                 x, y, neighbours[i].X, neighbours[i].Y, board.invertColor(color))
 
             // Get enemy stones with no liberties left
-            noLibertyStones := board.getNoLibertyStones(neighbours[i].X, neighbours[i].Y, int(board.BoardSize * x + y))
+            noLibertyStones := board.getNoLibertyStones(neighbours[i].X, neighbours[i].Y, x, y)
             for j := 0; j < len(noLibertyStones); j++ {
                 captures = append(captures, noLibertyStones[j])
             }
@@ -158,21 +162,65 @@ func (board *AbstractBoard) legal(x uint8, y uint8, color BoardStatus) (captures
     }
 
     // Check if the played move has no liberties and therefore is a suicide
-    selfNoLiberties := board.getNoLibertyStones(x, y, 0)
+    log.SetPrefix("legal ")
+    log.Printf("Check if Playmove (%d, %d) is a suicide.", x, y)
+    selfNoLiberties := board.getNoLibertyStones(x, y, 255, 255)
     if len(selfNoLiberties) > 0 {
         // Take move back
         board.setStatus(x, y, EMPTY)
         err = fmt.Errorf("Invalid move (Suicide not allowed)!")
     }
 
+    log.SetPrefix("")
     return
 }
 
 // Get all stones with no liberties left on given position
-func (board *AbstractBoard) getNoLibertyStones(x uint8, y uint8, exc int) (noLibertyStones []Position) {
-    noLibertyStones = make([]Position, 0)
+func (board *AbstractBoard) getNoLibertyStones(x uint8, y uint8, orgX uint8, orgY uint8) (noLibertyStones []Position) {
+    log.SetPrefix("getNoLibertyStones ")
+    log.Printf("Get no liberty stones for (%d, %d)", x, y)
 
-    // TODO: Implement
+    noLibertyStones = make([]Position, 0)
+    newlyFoundStones := []Position { Position { x, y } }
+    foundNew := true
+    var n []Position = nil
+
+    // Search until no new stones are found
+    for foundNew == true {
+        foundNew = false
+        n = make([]Position, 0)
+
+        for i := 0; i < len(newlyFoundStones); i++ {
+            x1 := newlyFoundStones[i].X
+            y1 := newlyFoundStones[i].Y
+            neighbours := board.getNeighbours(x1, y1)
+
+            for j := 0; j < len(neighbours); j++ {
+                nbX := neighbours[j].X
+                nbY := neighbours[j].Y
+
+                if board.getStatus(nbX, nbY) == EMPTY && nbX != orgX && nbY != orgY {
+                    log.SetPrefix("getNoLibertyStones ")
+                    log.Printf("Neighbour (%d, %d) is empty and not (%d, %d) so (%d, %d) has at least liberty",
+                        nbX, nbY, orgX, orgY, x, y)
+                    return noLibertyStones[:0]
+                } else {
+                    log.Printf("ELSE")
+                }
+            }
+        }
+
+        // Add newly found stones to the resultset
+        for i := 0; i < len(newlyFoundStones); i++ {
+            noLibertyStones = append(noLibertyStones, newlyFoundStones[i])
+        }
+        newlyFoundStones = n
+    }
+
+    log.SetPrefix("getNoLibertyStones ")
+    log.Printf("Found these stones with no liberties: %+v", noLibertyStones)
+    log.SetPrefix("")
+
     return
 }
 
@@ -193,8 +241,6 @@ func (board *AbstractBoard) getNeighbours(x uint8, y uint8) (neighbourIndexes []
     if y < board.BoardSize - 1 {
         neighbourIndexes = append(neighbourIndexes, Position { x, y + 1 })
     }
-
-    log.Printf("Neighbours for (X: %d, Y: %d) are %+v", x, y, neighbourIndexes)
 
     return
 }

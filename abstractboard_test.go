@@ -87,3 +87,16 @@ func TestPlayOccupiedPostionAndOffBoardsize(t *testing.T) {
         t.Errorf("A play on an occupied position should be illegal!")
     }
 }
+
+func TestPlayIsSuicide(t *testing.T) {
+    board, _ := NewBoard(9)
+
+    board.Play(0, 1, BLACK)
+    board.Play(0, 3, BLACK)
+    board.Play(1, 2, BLACK)
+    err := board.Play(0, 2, WHITE)
+
+    if err == nil {
+        t.Errorf("A suicide move should be illegal!")
+    }
+}
