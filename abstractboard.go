@@ -51,7 +51,7 @@ func (board *AbstractBoard) Clear() {
     for i := 0; i < len(board.data); i++ {
         board.data[i] = EMPTY
     }
-    board.undoStack = make([]*Move, 0)
+    board.undoStack = []*Move { }
 }
 
 // Returns the Top Move of the Undostack
@@ -119,7 +119,7 @@ func (board *AbstractBoard) Play(x uint8, y uint8, color BoardStatus) (error) {
 
 // Checks if move is legal and returns captured stones if necessary
 func (board *AbstractBoard) legal(x uint8, y uint8, color BoardStatus) (captures []Position, err error) {
-    captures = make([]Position, 0)
+    captures = []Position { }
     neighbours := board.getNeighbours(x, y)
 
     log.SetPrefix("legal ")
@@ -167,7 +167,7 @@ func (board *AbstractBoard) getNoLibertyStones(x uint8, y uint8, orgPosition Pos
     log.SetPrefix("getNoLibertyStones ")
     log.Printf("Get no liberty stones for (%d, %d)", x, y)
 
-    noLibertyStones = make([]Position, 0)
+    noLibertyStones = []Position { }
     newlyFoundStones := []Position { Position { x, y } }
     foundNew := true
     var groupStones []Position = nil
@@ -175,7 +175,7 @@ func (board *AbstractBoard) getNoLibertyStones(x uint8, y uint8, orgPosition Pos
     // Search until no new stones are found
     for foundNew == true {
         foundNew = false
-        groupStones = make([]Position, 0)
+        groupStones = []Position { }
 
         for i := 0; i < len(newlyFoundStones); i++ {
             x1 := newlyFoundStones[i].X
@@ -246,7 +246,7 @@ func (board *AbstractBoard) getNoLibertyStones(x uint8, y uint8, orgPosition Pos
 
 // Returns the neighbour array positions for a given point
 func (board *AbstractBoard) getNeighbours(x uint8, y uint8) (neighbourIndexes []Position) {
-    neighbourIndexes = make([]Position, 0)
+    neighbourIndexes = []Position { }
 
     // Check for board borders
     if x > 0 {
