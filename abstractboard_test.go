@@ -116,6 +116,30 @@ func TestPlayAndCaptureGroup(t *testing.T) {
     board.Play(0, 3, WHITE)
 
     if board.getStatus(0, 2) != EMPTY || board.getStatus(0, 1) != EMPTY {
-        t.Errorf("There should be no stones on the captures position")
+        t.Errorf("There should be no stones on the captures position!")
+    }
+}
+
+
+// Tests if Undo turns board to the previous position
+func TestPlayAndCaptureAndUndu(t *testing.T) {
+    board, _ := NewBoard(9)
+
+    board.Play(0, 2, BLACK)
+    board.Play(0, 1, BLACK)
+    board.Play(0, 0, WHITE)
+    board.Play(1, 1, WHITE)
+    board.Play(1, 2, WHITE)
+
+    boardPositionBeforeUndo := board.ToString()
+
+    // Play and undo move immediatly 
+    board.Play(0, 3, WHITE)
+    board.Undo(1)
+
+    boardPositionAfterUndo := board.ToString()
+
+    if boardPositionBeforeUndo != boardPositionAfterUndo {
+        t.Errorf("Undo should have recovered old board position!")
     }
 }

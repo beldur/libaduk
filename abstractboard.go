@@ -81,6 +81,25 @@ func (board *AbstractBoard) UndostackPushPass() {
     board.UndostackPush(&Move { 255, 255, PASS, nil })
 }
 
+// Undo `count` moves on the board
+func (board *AbstractBoard) Undo(count int) {
+    for i := 0; i < count; i++ {
+        if len(board.undoStack) > 0 {
+            move := board.UndostackPop()
+
+            // Remove stone from the board
+            if move.Color == BLACK || move.Color == WHITE {
+                board.setStatus(move.X, move.Y, EMPTY)
+            }
+
+            // Add captures back to board if necessary
+            for _, capture := range move.Captures {
+                board.setStatus(capture.X, capture.Y, board.invertColor(move.Color))
+            }
+        }
+    }
+}
+
 // Play move on board
 func (board *AbstractBoard) PlayMove(move Move) (error) {
     return board.Play(move.X, move.Y, move.Color)
