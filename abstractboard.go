@@ -145,10 +145,6 @@ func (board *AbstractBoard) legal(x uint8, y uint8, color BoardStatus) (captures
     for _, neighbour := range neighbours {
         // Is neighbour from another color?
         if board.getStatus(neighbour.X, neighbour.Y) == board.invertColor(color) {
-            log.SetPrefix("legal ")
-            log.Printf("Neighbour of Playmove (X: %d, Y: %d) at (X: %d, Y: %d) is %v. Get its No liberties...",
-                x, y, neighbour.X, neighbour.Y, board.invertColor(color))
-
             // Get enemy stones with no liberties left
             noLibertyStones := board.getNoLibertyStones(neighbour.X, neighbour.Y, Position { x, y })
             for _, noLibertyStone := range noLibertyStones {
