@@ -107,8 +107,8 @@ func (board *AbstractBoard) Play(x uint8, y uint8, color BoardStatus) (error) {
     }
 
     // Remove captures
-    for i := 0; i < len(captures); i++ {
-        board.setStatus(captures[i].X, captures[i].Y, EMPTY)
+    for _, capture := range captures {
+        board.setStatus(capture.X, capture.Y, EMPTY)
     }
 
     // Add them to undostack
@@ -122,21 +122,18 @@ func (board *AbstractBoard) legal(x uint8, y uint8, color BoardStatus) (captures
     captures = []Position { }
     neighbours := board.getNeighbours(x, y)
 
-    log.SetPrefix("legal ")
-    log.Printf("Neighbours for Playmove (X: %d, Y: %d) are %+v", x, y, neighbours)
-
     // Check if we capture neighbouring stones
-    for i := 0; i < len(neighbours); i++ {
+    for _, neighbour := range neighbours {
         // Is neighbour from another color?
-        if board.getStatus(neighbours[i].X, neighbours[i].Y) == board.invertColor(color) {
+        if board.getStatus(neighbour.X, neighbour.Y) == board.invertColor(color) {
             log.SetPrefix("legal ")
             log.Printf("Neighbour of Playmove (X: %d, Y: %d) at (X: %d, Y: %d) is %v. Get its No liberties...",
-                x, y, neighbours[i].X, neighbours[i].Y, board.invertColor(color))
+                x, y, neighbour.X, neighbour.Y, board.invertColor(color))
 
             // Get enemy stones with no liberties left
-            noLibertyStones := board.getNoLibertyStones(neighbours[i].X, neighbours[i].Y, Position { x, y })
-            for j := 0; j < len(noLibertyStones); j++ {
-                captures = append(captures, noLibertyStones[j])
+            noLibertyStones := board.getNoLibertyStones(neighbour.X, neighbour.Y, Position { x, y })
+            for _, noLibertyStone := range noLibertyStones {
+                captures = append(captures, noLibertyStone)
             }
         }
     }
@@ -149,9 +146,8 @@ func (board *AbstractBoard) legal(x uint8, y uint8, color BoardStatus) (captures
     }
 
     // Check if the played move has no liberties and therefore is a suicide
-    log.SetPrefix("legal ")
-    log.Printf("Check if Playmove (%d, %d) is a suicide.", x, y)
     selfNoLiberties := board.getNoLibertyStones(x, y, Position { })
+
     if len(selfNoLiberties) > 0 {
         // Take move back
         board.setStatus(x, y, EMPTY)
@@ -164,7 +160,6 @@ func (board *AbstractBoard) legal(x uint8, y uint8, color BoardStatus) (captures
 
 // Get all stones with no liberties left on given position
 func (board *AbstractBoard) getNoLibertyStones(x uint8, y uint8, orgPosition Position) (noLibertyStones []Position) {
-    log.SetPrefix("getNoLibertyStones ")
     log.Printf("Get no liberty stones for (%d, %d)", x, y)
 
     noLibertyStones = []Position { }
@@ -177,34 +172,29 @@ func (board *AbstractBoard) getNoLibertyStones(x uint8, y uint8, orgPosition Pos
         foundNew = false
         groupStones = []Position { }
 
-        for i := 0; i < len(newlyFoundStones); i++ {
-            x1 := newlyFoundStones[i].X
-            y1 := newlyFoundStones[i].Y
-            neighbours := board.getNeighbours(x1, y1)
+        for _, newlyFoundStone := range newlyFoundStones {
+            neighbours := board.getNeighbours(newlyFoundStone.X, newlyFoundStone.Y)
 
-            // Check liberties of stone x1, y1 by checking the neighbours
-            for j := 0; j < len(neighbours); j++ {
-                nbX := neighbours[j].X
-                nbY := neighbours[j].Y
+            // Check liberties of stone newlyFoundStone.X, newlyFoundStone.Y by checking the neighbours
+            for _, neighbour := range neighbours {
+                nbX := neighbour.X
+                nbY := neighbour.Y
 
-                // Has x1, y1 a free liberty?
-                if board.getStatus(nbX, nbY) == EMPTY && !neighbours[j].isSamePosition(orgPosition) {
-                    log.SetPrefix("getNoLibertyStones ")
-                    log.Printf("Neighbour (%d, %d) is empty and not (%d, %d) so (%d, %d) has at least liberty",
-                        nbX, nbY, orgPosition.X, orgPosition.Y, x, y)
+                // Has newlyFoundStone a free liberty?
+                if board.getStatus(nbX, nbY) == EMPTY && !neighbour.isSamePosition(orgPosition) {
+                    // Neighbour is empty and not origPosition so newlyFoundStone has at least one liberty
                     return noLibertyStones[:0]
                 } else {
-                    // Is the neighbour of x1, y1 the same color? Then we have a group here
-                    if board.getStatus(x1, y1) == board.getStatus(nbX, nbY) {
+                    // Is the neighbour of newlyFoundStone.X, newlyFoundStone.Y the same color? Then we have a group here
+                    if board.getStatus(newlyFoundStone.X, newlyFoundStone.Y) == board.getStatus(nbX, nbY) {
                         foundNewHere := true
-                        groupStone := Position { nbX, nbY }
+                        nbGroupStone := Position { nbX, nbY }
 
-                        log.SetPrefix("getNoLibertyStones ")
-                        log.Printf("Found group stone for (%d, %d) at %+v", x1, y1, groupStone)
+                        log.Printf("Found group stone for (%d, %d) at %+v", newlyFoundStone.X, newlyFoundStone.Y, nbGroupStone)
 
                         // Check if found stone is already in our group list
-                        for k := 0; k < len(groupStones); k++ {
-                            if groupStones[k].isSamePosition(groupStone) {
+                        for _, groupStone := range groupStones {
+                            if groupStone.isSamePosition(nbGroupStone) {
                                 foundNewHere = false
                                 break
                             }
@@ -212,8 +202,8 @@ func (board *AbstractBoard) getNoLibertyStones(x uint8, y uint8, orgPosition Pos
 
                         // Check if found stone is already in result set list
                         if foundNewHere {
-                            for k := 0; k < len(noLibertyStones); k++ {
-                                if noLibertyStones[k].isSamePosition(groupStone) {
+                            for _, noLibertyStone := range noLibertyStones {
+                                if noLibertyStone.isSamePosition(nbGroupStone) {
                                     foundNewHere = false
                                     break
                                 }
@@ -222,7 +212,7 @@ func (board *AbstractBoard) getNoLibertyStones(x uint8, y uint8, orgPosition Pos
 
                         // If groupStone is not known yet, add it
                         if foundNewHere {
-                            groupStones = append(groupStones, groupStone)
+                            groupStones = append(groupStones, nbGroupStone)
                             foundNew = true
                         }
                     }
@@ -237,9 +227,7 @@ func (board *AbstractBoard) getNoLibertyStones(x uint8, y uint8, orgPosition Pos
         newlyFoundStones = groupStones
     }
 
-    log.SetPrefix("getNoLibertyStones ")
     log.Printf("Found these stones with no liberties: %+v", noLibertyStones)
-    log.SetPrefix("")
 
     return
 }
