@@ -88,6 +88,7 @@ func TestPlayOccupiedPostionAndOffBoardsize(t *testing.T) {
     }
 }
 
+// Tests if the played move is recognized as a suicide
 func TestPlayIsSuicide(t *testing.T) {
     board, _ := NewBoard(9)
 
@@ -98,5 +99,23 @@ func TestPlayIsSuicide(t *testing.T) {
 
     if err == nil {
         t.Errorf("A suicide move should be illegal!")
+    }
+}
+
+// Tests if the played move captures the stones with no liberties left
+func TestPlayAndCaptureGroup(t *testing.T) {
+    board, _ := NewBoard(9)
+
+    board.Play(0, 2, BLACK)
+    board.Play(0, 1, BLACK)
+    board.Play(0, 0, WHITE)
+    board.Play(1, 1, WHITE)
+    board.Play(1, 2, WHITE)
+
+    // This move should capture the two black stones
+    board.Play(0, 3, WHITE)
+
+    if board.getStatus(0, 2) != EMPTY || board.getStatus(0, 1) != EMPTY {
+        t.Errorf("There should be no stones on the captures position")
     }
 }
