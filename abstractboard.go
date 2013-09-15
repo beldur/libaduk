@@ -53,6 +53,7 @@ func (board *AbstractBoard) Clear() {
     for i := 0; i < len(board.data); i++ {
         board.data[i] = EMPTY
     }
+    board.zobrist.hash = 0
     board.undoStack = []*Move { }
 }
 
