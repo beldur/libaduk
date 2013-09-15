@@ -10,6 +10,7 @@ type AbstractBoard struct {
     BoardSize uint8
     data []BoardStatus
     undoStack []*Move
+    zobrist *ZobristHash
 }
 
 // Creates new Go Board
@@ -22,6 +23,7 @@ func NewBoard(boardSize uint8) (*AbstractBoard, error) {
         boardSize,
         make([]BoardStatus, boardSize * boardSize),
         make([]*Move, 0),
+        NewZobristHash(boardSize),
     }, nil
 }
 
@@ -71,8 +73,6 @@ func (board *AbstractBoard) UndostackPop() (move *Move) {
 
 // Adds the given Move to the Undostack
 func (board *AbstractBoard) UndostackPush(move *Move) {
-    log.Printf("Add Move to Undostack: %+v", move)
-
     board.undoStack = append(board.undoStack, move)
 }
 
@@ -87,17 +87,24 @@ func (board *AbstractBoard) Undo(count int) {
         if len(board.undoStack) > 0 {
             move := board.UndostackPop()
 
-            // Remove stone from the board
+            // Remove stone from the board and update hash
             if move.Color == BLACK || move.Color == WHITE {
+                board.zobrist.Hash(move.X, move.Y, move.Color)
                 board.setStatus(move.X, move.Y, EMPTY)
             }
 
-            // Add captures back to board if necessary
+            // Add captures back to board if necessary and update hash
             for _, capture := range move.Captures {
+                board.zobrist.Hash(capture.X, capture.Y, board.invertColor(move.Color))
                 board.setStatus(capture.X, capture.Y, board.invertColor(move.Color))
             }
         }
     }
+}
+
+// Returns current board hash value
+func (board *AbstractBoard) GetHash() int64 {
+    return board.zobrist.GetHash()
 }
 
 // Play move on board
@@ -127,6 +134,7 @@ func (board *AbstractBoard) Play(x uint8, y uint8, color BoardStatus) (error) {
 
     // Remove captures
     for _, capture := range captures {
+        board.zobrist.Hash(capture.X, capture.Y, board.invertColor(color))
         board.setStatus(capture.X, capture.Y, EMPTY)
     }
 
@@ -153,6 +161,8 @@ func (board *AbstractBoard) legal(x uint8, y uint8, color BoardStatus) (captures
         }
     }
 
+    // Place stone on the board and update hash
+    board.zobrist.Hash(x, y, color)
     board.setStatus(x, y, color)
 
     // TODO: Delete Duplicates necessary????
@@ -165,6 +175,7 @@ func (board *AbstractBoard) legal(x uint8, y uint8, color BoardStatus) (captures
 
     if len(selfNoLiberties) > 0 {
         // Take move back
+        board.zobrist.Hash(x, y, color)
         board.setStatus(x, y, EMPTY)
         err = fmt.Errorf("Invalid move (Suicide not allowed)!")
     }

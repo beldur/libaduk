@@ -122,7 +122,7 @@ func TestPlayAndCaptureGroup(t *testing.T) {
 
 
 // Tests if Undo turns board to the previous position
-func TestPlayAndCaptureAndUndu(t *testing.T) {
+func TestPlayAndCaptureAndUndo(t *testing.T) {
     board, _ := NewBoard(9)
 
     board.Play(0, 2, BLACK)
@@ -131,13 +131,13 @@ func TestPlayAndCaptureAndUndu(t *testing.T) {
     board.Play(1, 1, WHITE)
     board.Play(1, 2, WHITE)
 
-    boardPositionBeforeUndo := board.ToString()
+    boardPositionBeforeUndo := board.GetHash()
 
-    // Play and undo move immediatly 
+    // Play and undo move immediately 
     board.Play(0, 3, WHITE)
     board.Undo(1)
 
-    boardPositionAfterUndo := board.ToString()
+    boardPositionAfterUndo := board.GetHash()
 
     if boardPositionBeforeUndo != boardPositionAfterUndo {
         t.Errorf("Undo should have recovered old board position!")
