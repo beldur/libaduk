@@ -2,6 +2,19 @@ package libaduk
 
 type BoardStatus uint8
 
+// Inverts Black to White or White to Black
+func (bs BoardStatus) invert() BoardStatus {
+    if bs == WHITE {
+        return BLACK
+    }
+
+    if bs == BLACK {
+        return WHITE
+    }
+
+    return EMPTY
+}
+
 const (
     EMPTY BoardStatus = iota
     BLACK

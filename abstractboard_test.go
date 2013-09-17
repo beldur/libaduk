@@ -32,19 +32,6 @@ func TestGetStatusAndSetStatus(t *testing.T) {
     }
 }
 
-// Tests invertColor functionality
-func TestInvertColor(t *testing.T) {
-    board, _ := NewBoard(9)
-
-    if board.invertColor(BLACK) != WHITE {
-        t.Errorf("Inverted Color of %d should be %d but was %d!", BLACK, WHITE, board.invertColor(BLACK))
-    }
-
-    if board.invertColor(WHITE) != BLACK {
-        t.Errorf("Inverted Color of %d should be %d but was %d!", WHITE, BLACK, board.invertColor(WHITE))
-    }
-}
-
 // Tests getNeighbours functionality
 func TestNeighbours(t *testing.T) {
     board, _ := NewBoard(9)

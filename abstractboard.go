@@ -96,8 +96,8 @@ func (board *AbstractBoard) Undo(count int) {
 
             // Add captures back to board if necessary and update hash
             for _, capture := range move.Captures {
-                board.zobrist.Hash(capture.X, capture.Y, board.invertColor(move.Color))
-                board.setStatus(capture.X, capture.Y, board.invertColor(move.Color))
+                board.zobrist.Hash(capture.X, capture.Y, move.Color.invert())
+                board.setStatus(capture.X, capture.Y, move.Color.invert())
             }
         }
     }
@@ -135,7 +135,7 @@ func (board *AbstractBoard) Play(x uint8, y uint8, color BoardStatus) (error) {
 
     // Remove captures
     for _, capture := range captures {
-        board.zobrist.Hash(capture.X, capture.Y, board.invertColor(color))
+        board.zobrist.Hash(capture.X, capture.Y, color.invert())
         board.setStatus(capture.X, capture.Y, EMPTY)
     }
 
@@ -153,7 +153,7 @@ func (board *AbstractBoard) legal(x uint8, y uint8, color BoardStatus) (captures
     // Check if we capture neighbouring stones
     for _, neighbour := range neighbours {
         // Is neighbour from another color?
-        if board.getStatus(neighbour.X, neighbour.Y) == board.invertColor(color) {
+        if board.getStatus(neighbour.X, neighbour.Y) == color.invert() {
             // Get enemy stones with no liberties left
             noLibertyStones := board.getNoLibertyStones(neighbour.X, neighbour.Y, Position { x, y })
             for _, noLibertyStone := range noLibertyStones {
@@ -286,17 +286,4 @@ func (board *AbstractBoard) getStatus(x uint8, y uint8) BoardStatus {
 
 func (board *AbstractBoard) setStatus(x uint8, y uint8, status BoardStatus) {
     board.data[board.BoardSize * x + y] = status
-}
-
-// Inverts Black to White or White to Black
-func (board *AbstractBoard) invertColor(color BoardStatus) BoardStatus {
-    if color == WHITE {
-        return BLACK
-    }
-
-    if color == BLACK {
-        return WHITE
-    }
-
-    return EMPTY
 }
