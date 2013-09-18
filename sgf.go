@@ -1,6 +1,7 @@
 package libaduk
 
 import (
+    "log"
     "fmt"
 )
 
@@ -31,6 +32,7 @@ type Cursor struct {
     tree *Node
 }
 
+// Create a new cursor struct for given sgf data
 func NewCursor(sgf []byte) (*Cursor, error) {
     tree, err := parse(string(sgf))
 
@@ -43,11 +45,14 @@ func NewCursor(sgf []byte) (*Cursor, error) {
 
 // Begin parse an sgf string
 func parse(sgf string) (*Node, error) {
+    log.Printf("Parsing: %s\n", sgf)
+
     tree := NewNode(nil)
-    currentNode := tree
+    lastNode := tree
     sequenceNodes := make([]*Node, 0)
     nodeStartIndex := -1
     lastParsedType := SEQUENCE_END
+    isInProperty := false
 
     // range on string handles unicode automatically
     for i, value := range sgf {
@@ -81,17 +86,18 @@ func parse(sgf string) (*Node, error) {
 
         // Sequence starts
         if value == SEQUENCE_START {
+
             // Safe sgf string to current node before creating a new one
             if lastParsedType != SEQUENCE_END && nodeStartIndex != -1 {
-                currentNode.sgfData = sgf[nodeStartIndex:i]
+                lastNode.sgfData = sgf[nodeStartIndex:i]
             }
 
             // Create new Node for Sequence
-            node := NewNode(currentNode)
+            node := NewNode(lastNode)
 
-            // Has current node already a child, than node is a sibling of currentNode
-            if currentNode.Next != nil {
-                last := currentNode.Next
+            // Has current node already a child, than node is a sibling of lastNode
+            if lastNode.Next != nil {
+                last := lastNode.Next
 
                 for last.Down != nil {
                     last = last.Down
@@ -101,16 +107,16 @@ func parse(sgf string) (*Node, error) {
                 last.Down = node
                 node.level = last.level + 1
             } else {
-                currentNode.Next = node
+                lastNode.Next = node
             }
 
             // Update current to new sequence
-            currentNode.numChildren++
+            lastNode.numChildren++
 
             // Add sequence to stack
-            sequenceNodes = append(sequenceNodes, currentNode)
+            sequenceNodes = append(sequenceNodes, lastNode)
 
-            currentNode = node
+            lastNode = node
             nodeStartIndex = -1
             lastParsedType = SEQUENCE_START
         }
@@ -119,13 +125,16 @@ func parse(sgf string) (*Node, error) {
         if value == SEQUENCE_END {
             // Safe sgf string to current node before creating a new one
             if lastParsedType != SEQUENCE_END && nodeStartIndex != -1 {
-                currentNode.sgfData = sgf[nodeStartIndex:i]
+                lastNode.sgfData = sgf[nodeStartIndex:i]
             }
 
             // If we had sequences in the stack, set current node to last in stack
             if len(sequenceNodes) > 0 {
-                currentNode = sequenceNodes[len(sequenceNodes) - 1]
+                lastNode = sequenceNodes[len(sequenceNodes) - 1]
                 sequenceNodes = sequenceNodes[:len(sequenceNodes) - 1]
+            } else {
+                // If there was no sequence start for this sequence end, the sgf is malformed
+                return nil, fmt.Errorf("Malformed SGF (No Sequence start found for sequence end at position %d)!", i)
             }
 
             lastParsedType = SEQUENCE_END
@@ -135,20 +144,23 @@ func parse(sgf string) (*Node, error) {
         if value == NODE_START {
             if nodeStartIndex != -1 {
                 // Safe sgf string to current node before creating a new one
-                currentNode.sgfData = sgf[nodeStartIndex:i]
+                lastNode.sgfData = sgf[nodeStartIndex:i]
 
                 // Create new node and update current
-                node := NewNode(currentNode)
-                currentNode.numChildren = 1
-                currentNode.Next = node
-                currentNode = node
+                node := NewNode(lastNode)
+                lastNode.numChildren = 1
+                lastNode.Next = node
+                lastNode = node
 
             }
 
             nodeStartIndex = i
         }
+    }
 
-        fmt.Printf("") //"%d:%+v ", i, string(value))
+    // If we are in a property or sequence after parsing, the sgf is malformed
+    if isInProperty || len(sequenceNodes) > 0 {
+        return nil, fmt.Errorf("Malformed SGF (Still in Property or Sequence after parsing)!")
     }
 
     return tree, nil
