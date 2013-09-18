@@ -9,6 +9,6 @@ PW[Player White]PB[Player Black]
 ;W[])
 (;B[cc]C[A [second\] (comment)]
 (;W[gg])
-(;W[ee]))
-(;B[ec]C[And \\[a \\\\\\\\third\\\\\\\\\] comment)]
+(;W[ee]))(
+(;B[ec]C[And [a \\\\\\\\third\\\\\\\\\] comment)]
 ;W[eg]))
