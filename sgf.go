@@ -45,7 +45,7 @@ func NewCursor(sgf []byte) (*Cursor, error) {
 
 // Begin parse an sgf string
 func parse(sgf string) (*Node, error) {
-    log.Printf("Parsing: %s\n", sgf)
+    log.Printf("\n\nParsing: %s\n", sgf)
 
     tree := NewNode(nil)
     lastNode := tree
@@ -143,7 +143,7 @@ func parse(sgf string) (*Node, error) {
         // Node starts
         if value == NODE_START {
             if nodeStartIndex != -1 {
-                // Safe sgf string to current node before creating a new one
+                // Safe sgf string to last node before creating a new one
                 lastNode.sgfData = sgf[nodeStartIndex:i]
 
                 // Create new node and update current
@@ -163,5 +163,15 @@ func parse(sgf string) (*Node, error) {
         return nil, fmt.Errorf("Malformed SGF (Still in Property or Sequence after parsing)!")
     }
 
-    return tree, nil
+    // Last Node should now be the last item from the sequence stack, so it should be the root
+    node := tree.Next
+    node.Previous = nil
+    node.Up = nil
+
+    for node.Down != nil {
+        node = node.Down
+        node.Previous = nil
+    }
+
+    return tree.Next, nil
 }

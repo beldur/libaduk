@@ -7,7 +7,7 @@ import (
 
 const (
     Testgame9x9 = "testing/Batora-okao.sgf"
-    TestgameMultipleNodes = "testing/Multiple-Nodes.sgf"
+    TestgameEasy = "testing/Easy.sgf"
     TestgameSmall = "testing/Small.sgf"
     TestgameSmallMalformed = "testing/SmallMalformed.sgf"
 )
@@ -25,7 +25,7 @@ const (
 func TestSgfReadAndNumChildren(t *testing.T) {
     sgfData, _ := ioutil.ReadFile(TestgameSmall)
     cursor, _ := NewCursor(sgfData)
-    root := cursor.tree.Next
+    root := cursor.tree
 
     if root.Next.numChildren != 1 {
         t.Errorf("Node 1 should have 1 children but was: %+v", root.Next)
@@ -47,5 +47,14 @@ func TestSgfReadMalformed(t *testing.T) {
 
     if err == nil {
         t.Errorf("Sgf should be malformed but was accepted!")
+    }
+}
+
+func TestEasySgfRead(t *testing.T) {
+    sgfData, _ := ioutil.ReadFile(TestgameEasy)
+    _, err := NewCursor(sgfData)
+
+    if err != nil {
+        t.Errorf("Reading an easy wellformed sgf should be successful but was %+v", err)
     }
 }
