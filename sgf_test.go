@@ -22,21 +22,23 @@ const (
  *
  * Checks if 2 has 3 children and 3.1 has 2 children
  */
-func TestSgfReadAndNumChildren(t *testing.T) {
+func TestSgfReadAndNumChildrenAndNext(t *testing.T) {
     sgfData, _ := ioutil.ReadFile(TestgameSmall)
     cursor, _ := NewCursor(sgfData)
-    root, _ := cursor.GetRootNode(0)
+    _ = cursor.Game(0)
 
-    if root.numChildren != 1 {
-        t.Errorf("Node 1 should have 1 children but was: %+v", root)
+    if cursor.Current().numChildren != 1 {
+        t.Errorf("Node 1 should have 1 children but was: %+v", cursor.Current())
     }
 
-    if root.Next.numChildren != 3 {
-        t.Errorf("Node 2 should have 3 Children but was: %+v", root.Next)
+    cursor.Next(0)
+    if cursor.Current().numChildren != 3 {
+        t.Errorf("Node 2 should have 3 Children but was: %+v", cursor.Current())
     }
 
-    if root.Next.Next.Down.numChildren != 2 {
-        t.Errorf("Node 3.1 should have 2 children but was: %+v", root.Next.Next.Down)
+    cursor.Next(1)
+    if cursor.Current().numChildren != 2 {
+        t.Errorf("Node 3.1 should have 2 children but was: %+v", cursor.Current())
     }
 }
 

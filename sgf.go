@@ -47,17 +47,17 @@ func NewCursor(sgf []byte) (*Cursor, error) {
 
 // Returns the n'th root node. In a normal game there is only one root (0)
 func (cursor *Cursor) GetRootNode(n int) (*Node, error) {
-    if n < cursor.rootNode.numChildren {
-        node := cursor.rootNode.Next
-
-        for i := 0; i < n; i++ {
-            node = node.Down
-        }
-
-        return node, nil;
+    if n >= cursor.rootNode.numChildren {
+        return nil, fmt.Errorf("Cant find %d'th Root Node!", n)
     }
 
-    return nil, fmt.Errorf("Cant find %d'th Root Node!", n)
+    node := cursor.rootNode.Next
+
+    for i := 0; i < n; i++ {
+        node = node.Down
+    }
+
+    return node, nil;
 }
 
 // Set the Cursor to the n'th game
@@ -73,9 +73,24 @@ func (cursor *Cursor) Game(n int) error {
     return nil
 }
 
-// Return the Cursors current node
+// Returns the Cursors current node
 func (cursor *Cursor) Current() *Node {
     return cursor.currentNode
+}
+
+// Set the cursor the the n'th next node
+func (cursor *Cursor) Next(n int) (*Node, error) {
+    if n >= cursor.currentNode.numChildren {
+        return nil, fmt.Errorf("Can't find %d'th Next Node!", n)
+    }
+
+    cursor.currentNode = cursor.currentNode.Next
+
+    for i := 0; i < n; i++ {
+        cursor.currentNode = cursor.currentNode.Down
+    }
+
+    return cursor.currentNode, nil
 }
 
 // Begin parse an sgf string
