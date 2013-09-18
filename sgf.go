@@ -58,6 +58,27 @@ func parse(sgf string) (*Node, error) {
             continue
         }
 
+        // When in property, continue until end of property
+        if isInProperty {
+            if value == PROPERTY_END {
+                // Here we check if the end of proptery is really the end or just an escaped character
+                numberOfEscapes := 0
+                for j := i - 1; sgf[j] == '\\'; j-- {
+                    numberOfEscapes++
+                }
+
+                // If number of escapes is even, the property really ends here
+                if numberOfEscapes % 2  == 0 {
+                    isInProperty = false
+                }
+            }
+            continue
+        }
+
+        if value == PROPERTY_START {
+            isInProperty = true
+        }
+
         // Sequence starts
         if value == SEQUENCE_START {
             // Safe sgf string to current node before creating a new one
