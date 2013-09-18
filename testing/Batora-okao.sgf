@@ -3,7 +3,7 @@ RU[Japanese]SZ[9]KM[6.50]TM[0]OT[5x10 byo-yomi]
 PW[Batora]PB[okao]BR[8d]DT[2013-07-22]PC[The KGS Go Server at http://www.gokgs.com/]C[Batora [-\]: お願いします
 okao [8d\]: hi
 ]RE[W+3.50]
-;B[gd]BL[10]OB[5]
+(;B[gd]BL[10]OB[5]
 ;W[dc]WL[10]OW[5]
 ;B[de]BL[10]OB[5]
 ;W[fg]WL[10]OW[5]
@@ -64,3 +64,6 @@ Batora [-\]: abunaaaaaaaaaa
 okao [8d\]: 9路むずいなっ
 Batora [-\]: はい･･･
 ])
+(;B[ee]
+;W[ge]
+;B[ec]))

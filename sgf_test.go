@@ -25,18 +25,18 @@ const (
 func TestSgfReadAndNumChildren(t *testing.T) {
     sgfData, _ := ioutil.ReadFile(TestgameSmall)
     cursor, _ := NewCursor(sgfData)
-    root := cursor.tree
+    root, _ := cursor.GetRootNode(0)
 
-    if root.Next.numChildren != 1 {
-        t.Errorf("Node 1 should have 1 children but was: %+v", root.Next)
+    if root.numChildren != 1 {
+        t.Errorf("Node 1 should have 1 children but was: %+v", root)
     }
 
-    if root.Next.Next.numChildren != 3 {
-        t.Errorf("Node 2 should have 3 Children but was: %+v", root.Next.Next.Next)
+    if root.Next.numChildren != 3 {
+        t.Errorf("Node 2 should have 3 Children but was: %+v", root.Next)
     }
 
-    if root.Next.Next.Next.Down.numChildren != 2 {
-        t.Errorf("Node 3.1 should have 2 children but was: %+v", root.Next.Next.Next.Down)
+    if root.Next.Next.Down.numChildren != 2 {
+        t.Errorf("Node 3.1 should have 2 children but was: %+v", root.Next.Next.Down)
     }
 }
 
@@ -50,11 +50,33 @@ func TestSgfReadMalformed(t *testing.T) {
     }
 }
 
+// Tests reading easy sgf without errors
 func TestEasySgfRead(t *testing.T) {
     sgfData, _ := ioutil.ReadFile(TestgameEasy)
     _, err := NewCursor(sgfData)
 
     if err != nil {
         t.Errorf("Reading an easy wellformed sgf should be successful but was %+v", err)
+    }
+}
+
+// Tests if we can get the correct root games
+func TestMultiRootGameAndGetRootNode(t *testing.T) {
+    sgfData, _ := ioutil.ReadFile(Testgame9x9)
+    cursor, _ := NewCursor(sgfData)
+
+    _ = cursor.Game(0)
+    if cursor.Current() == nil {
+        t.Errorf("Cursor should have a root Node!")
+    }
+
+    _ = cursor.Game(1)
+    if cursor.Current() == nil {
+        t.Errorf("Cursor should have at least a second root Node!")
+    }
+
+    err := cursor.Game(2)
+    if err == nil {
+        t.Errorf("There should be no third root Node!")
     }
 }

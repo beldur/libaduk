@@ -29,7 +29,9 @@ func NewNode(prev *Node) *Node {
 
 // The cursor parses Sgf data and provides methods to traverse the game
 type Cursor struct {
-    tree *Node
+    rootNode *Node
+    // Pointer to current Node in tree
+    currentNode *Node
 }
 
 // Create a new cursor struct for given sgf data
@@ -40,12 +42,45 @@ func NewCursor(sgf []byte) (*Cursor, error) {
         return nil, err
     }
 
-    return &Cursor { tree }, nil
+    return &Cursor { tree, tree }, nil
+}
+
+// Returns the n'th root node. In a normal game there is only one root (0)
+func (cursor *Cursor) GetRootNode(n int) (*Node, error) {
+    if n < cursor.rootNode.numChildren {
+        node := cursor.rootNode.Next
+
+        for i := 0; i < n; i++ {
+            node = node.Down
+        }
+
+        return node, nil;
+    }
+
+    return nil, fmt.Errorf("Cant find %d'th Root Node!", n)
+}
+
+// Set the Cursor to the n'th game
+func (cursor *Cursor) Game(n int) error {
+    gameNode, err := cursor.GetRootNode(n)
+
+    if err != nil {
+        return err
+    }
+
+    cursor.currentNode = gameNode
+
+    return nil
+}
+
+// Return the Cursors current node
+func (cursor *Cursor) Current() *Node {
+    return cursor.currentNode
 }
 
 // Begin parse an sgf string
 func parse(sgf string) (*Node, error) {
-    log.Printf("\n\nParsing: %s\n", sgf)
+    log.Printf("Parsing: %s\n", sgf)
 
     tree := NewNode(nil)
     lastNode := tree
@@ -164,6 +199,7 @@ func parse(sgf string) (*Node, error) {
     }
 
     // Last Node should now be the last item from the sequence stack, so it should be the root
+    // So we remove all ties from the first node to the root node
     node := tree.Next
     node.Previous = nil
     node.Up = nil
