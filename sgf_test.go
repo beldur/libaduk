@@ -20,7 +20,7 @@ const (
 //             \-> 3 -> 4
 //
 // Tests if 2 has 3 children and 3.1 has 2 children
-func TestSgfReadAndNumChildrenAndNext(t *testing.T) {
+func TestSgfReadAndNumChildrenAndNextAndPrevious(t *testing.T) {
     sgfData, _ := ioutil.ReadFile(TestgameSmall)
     cursor, _ := NewCursor(sgfData)
     _, _ = cursor.Game(0)
@@ -34,7 +34,9 @@ func TestSgfReadAndNumChildrenAndNext(t *testing.T) {
         t.Errorf("Node 2 should have 3 Children but was: %+v", cursor.Current())
     }
 
-    cursor.Next(1)
+    cursor.Next(1) // go to 3.1
+    cursor.Next(1) // go to 4.1
+    cursor.Previous() // go to 3.1
     if cursor.Current().numChildren != 2 {
         t.Errorf("Node 3.1 should have 2 children but was: %+v", cursor.Current())
     }

@@ -93,6 +93,17 @@ func (cursor *Cursor) Next(n int) (*Node, error) {
     return cursor.currentNode, nil
 }
 
+// Set the cursor to the previous node
+func (cursor *Cursor) Previous() (*Node, error) {
+    if cursor.currentNode.Previous == nil {
+        return nil, fmt.Errorf("Can't find Previous Node!")
+    }
+
+    cursor.currentNode = cursor.currentNode.Previous
+
+    return cursor.currentNode, nil
+}
+
 // Begin parse an sgf string
 func parse(sgf string) (*Node, error) {
     log.Printf("Parsing: %s\n", sgf)
