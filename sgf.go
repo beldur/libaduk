@@ -46,7 +46,7 @@ func NewCursor(sgf []byte) (*Cursor, error) {
 }
 
 // Returns the n'th root node. In a normal game there is only one root (0)
-func (cursor *Cursor) GetRootNode(n int) (*Node, error) {
+func (cursor *Cursor) getRootNode(n int) (*Node, error) {
     if n >= cursor.rootNode.numChildren {
         return nil, fmt.Errorf("Cant find %d'th Root Node!", n)
     }
@@ -61,16 +61,16 @@ func (cursor *Cursor) GetRootNode(n int) (*Node, error) {
 }
 
 // Set the Cursor to the n'th game
-func (cursor *Cursor) Game(n int) error {
-    gameNode, err := cursor.GetRootNode(n)
+func (cursor *Cursor) Game(n int) (*Node, error) {
+    gameNode, err := cursor.getRootNode(n)
 
     if err != nil {
-        return err
+        return nil, err
     }
 
     cursor.currentNode = gameNode
 
-    return nil
+    return cursor.currentNode, nil
 }
 
 // Returns the Cursors current node
@@ -78,7 +78,7 @@ func (cursor *Cursor) Current() *Node {
     return cursor.currentNode
 }
 
-// Set the cursor the the n'th next node
+// Set the cursor to the n'th next node
 func (cursor *Cursor) Next(n int) (*Node, error) {
     if n >= cursor.currentNode.numChildren {
         return nil, fmt.Errorf("Can't find %d'th Next Node!", n)

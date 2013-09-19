@@ -12,20 +12,18 @@ const (
     TestgameSmallMalformed = "testing/SmallMalformed.sgf"
 )
 
-/**
- * Small.sgf has this structure:
- *  
- *  X -> 1 -> 2 -> 3 -> 4 -> 5 -> 6
- *             \-> 3 -> 4
- *             |    \-> 4
- *             \-> 3 -> 4
- *
- * Checks if 2 has 3 children and 3.1 has 2 children
- */
+// Small.sgf has this structure:
+//
+//  X -> 1 -> 2 -> 3 -> 4 -> 5 -> 6
+//             \-> 3 -> 4
+//             |    \-> 4
+//             \-> 3 -> 4
+//
+// Tests if 2 has 3 children and 3.1 has 2 children
 func TestSgfReadAndNumChildrenAndNext(t *testing.T) {
     sgfData, _ := ioutil.ReadFile(TestgameSmall)
     cursor, _ := NewCursor(sgfData)
-    _ = cursor.Game(0)
+    _, _ = cursor.Game(0)
 
     if cursor.Current().numChildren != 1 {
         t.Errorf("Node 1 should have 1 children but was: %+v", cursor.Current())
@@ -67,17 +65,17 @@ func TestMultiRootGameAndGetRootNode(t *testing.T) {
     sgfData, _ := ioutil.ReadFile(Testgame9x9)
     cursor, _ := NewCursor(sgfData)
 
-    _ = cursor.Game(0)
+    _, _ = cursor.Game(0)
     if cursor.Current() == nil {
         t.Errorf("Cursor should have a root Node!")
     }
 
-    _ = cursor.Game(1)
+    _, _ = cursor.Game(1)
     if cursor.Current() == nil {
         t.Errorf("Cursor should have at least a second root Node!")
     }
 
-    err := cursor.Game(2)
+    _, err := cursor.Game(2)
     if err == nil {
         t.Errorf("There should be no third root Node!")
     }
