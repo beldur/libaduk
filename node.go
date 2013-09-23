@@ -1,7 +1,6 @@
 package libaduk
 
-import (
-)
+import ()
 
 type Node struct {
 	Previous    *Node // Parent Node
@@ -18,6 +17,5 @@ func NewNode(prev *Node) *Node {
 }
 
 func (node *Node) ToString() string {
-    return "TODO"
+	return "TODO"
 }
-

@@ -83,43 +83,43 @@ func (cursor *Cursor) Previous() (*Node, error) {
 
 // Deletes the given variation from the tree
 func (cursor *Cursor) DeleteVariation(node *Node) {
-    if node.Previous != nil {
-        cursor.removeNode(node)
-    } else {
-        if node.Next != nil {
-            n := node.Next
-            for n.Down != nil {
-                n = node.Down
-                cursor.removeNode(n.Up)
-            }
-            cursor.removeNode(n)
-        }
-        node.Next = nil
-    }
+	if node.Previous != nil {
+		cursor.removeNode(node)
+	} else {
+		if node.Next != nil {
+			n := node.Next
+			for n.Down != nil {
+				n = node.Down
+				cursor.removeNode(n.Up)
+			}
+			cursor.removeNode(n)
+		}
+		node.Next = nil
+	}
 }
 
 // Remove the given node from the tree
 func (cursor *Cursor) removeNode(node *Node) {
-    // Update Node Up/Previous to not include given node
-    if node.Up != nil {
-        node.Up.Down = node.Down
-    } else {
-        node.Previous.Next = node.Down
-    }
+	// Update Node Up/Previous to not include given node
+	if node.Up != nil {
+		node.Up.Down = node.Down
+	} else {
+		node.Previous.Next = node.Down
+	}
 
-    if node.Down != nil {
-        // Update Node Down to not include given node
-        node.Down.Up = node.Up
+	if node.Down != nil {
+		// Update Node Down to not include given node
+		node.Down.Up = node.Up
 
-        // Update levels for all Down nodes bei -1
-        n := node.Down
-        for n != nil {
-            n.level--
-            n = node.Down
-        }
-    }
+		// Update levels for all Down nodes bei -1
+		n := node.Down
+		for n != nil {
+			n.level--
+			n = node.Down
+		}
+	}
 
-    // Update children count of parent and destroy node
-    node.Previous.numChildren--
-    node = nil
+	// Update children count of parent and destroy node
+	node.Previous.numChildren--
+	node = nil
 }
