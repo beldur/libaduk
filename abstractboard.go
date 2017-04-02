@@ -43,8 +43,8 @@ func (board *AbstractBoard) Contains(position Position) bool {
 func (board *AbstractBoard) ToString() string {
 	result := ""
 
-	for y := uint8(0); y < board.BoardSize; y++ {
-		for x := uint8(0); x < board.BoardSize; x++ {
+	for x := uint8(0); x < board.BoardSize; x++ {
+		for y := uint8(0); y < board.BoardSize; y++ {
 			switch board.getStatus(x, y) {
 			case EMPTY:
 				result += ". "
