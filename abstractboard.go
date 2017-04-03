@@ -27,12 +27,24 @@ func NewBoard(boardSize uint8) (*AbstractBoard, error) {
 	}, nil
 }
 
+func (board *AbstractBoard) Len() int {
+	return len(board.data)
+}
+
+//Verify if a given position is within the boundaries of the board
+func (board *AbstractBoard) Contains(position Position) bool {
+	return position.X >= 0 &&
+		position.X < board.BoardSize &&
+		position.Y >= 0 &&
+		position.Y < board.BoardSize
+}
+
 // Returns a string representation of the current board status
 func (board *AbstractBoard) ToString() string {
 	result := ""
 
-	for y := uint8(0); y < board.BoardSize; y++ {
-		for x := uint8(0); x < board.BoardSize; x++ {
+	for x := uint8(0); x < board.BoardSize; x++ {
+		for y := uint8(0); y < board.BoardSize; y++ {
 			switch board.getStatus(x, y) {
 			case EMPTY:
 				result += ". "
@@ -262,21 +274,18 @@ func (board *AbstractBoard) getNoLibertyStones(x uint8, y uint8, orgPosition Pos
 // Returns the neighbour array positions for a given point
 func (board *AbstractBoard) getNeighbours(x uint8, y uint8) (neighbourIndexes []Position) {
 	neighbourIndexes = []Position{}
-
-	// Check for board borders
-	if x > 0 {
-		neighbourIndexes = append(neighbourIndexes, Position{(x - 1), y})
-	}
-	if x < board.BoardSize-1 {
-		neighbourIndexes = append(neighbourIndexes, Position{(x + 1), y})
-	}
-	if y > 0 {
-		neighbourIndexes = append(neighbourIndexes, Position{x, y - 1})
-	}
-	if y < board.BoardSize-1 {
-		neighbourIndexes = append(neighbourIndexes, Position{x, y + 1})
+	possibleNeighbours := [...]Position{
+		Position{(x - 1), y},
+		Position{(x + 1), y},
+		Position{x, (y - 1)},
+		Position{x, (y + 1)},
 	}
 
+	for _, position := range possibleNeighbours {
+		if board.Contains(position) {
+			neighbourIndexes = append(neighbourIndexes, position)
+		}
+	}
 	return
 }
 
